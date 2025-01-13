@@ -77,52 +77,51 @@
 
     const resampledCeData: OHLCData[] = [];
     const resampledPeData: OHLCData[] = [];
-if (rawCeData.length > 0) {
-  let currentIntervalStart = Math.floor(new Date(rawCeData[0].timestamp).getTime() / interval) * interval;
-  let currentBatch: { timestamp: string; ltp: number }[] = [];
-  for (const item of rawCeData) {
-    const itemTime = new Date(item.timestamp).getTime();
-    if (itemTime >= currentIntervalStart && itemTime < currentIntervalStart + interval) {
-      currentBatch.push(item);
-    } else {
+
+    if (rawCeData.length > 0) {
+      let currentIntervalStart = Math.floor(new Date(rawCeData[0].timestamp).getTime() / interval) * interval;
+      let currentBatch: { timestamp: string; ltp: number }[] = [];
+      for (const item of rawCeData) {
+        const itemTime = new Date(item.timestamp).getTime();
+        if (itemTime >= currentIntervalStart && itemTime < currentIntervalStart + interval) {
+          currentBatch.push(item);
+        } else {
+          if (currentBatch.length > 0) {
+            resampledCeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
+          }
+          currentIntervalStart = Math.floor(itemTime / interval) * interval;
+          currentBatch = [item];
+        }
+      }
       if (currentBatch.length > 0) {
         resampledCeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
       }
-      currentIntervalStart = Math.floor(itemTime / interval) * interval;
-      currentBatch = [item];
     }
-  }
-  if (currentBatch.length > 0) {
-    resampledCeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
-  }
-}
 
-if (rawPeData.length > 0) {
-  let currentIntervalStart = Math.floor(new Date(rawPeData[0].timestamp).getTime() / interval) * interval;
-  let currentBatch: { timestamp: string; ltp: number }[] = [];
-  for (const item of rawPeData) {
-    const itemTime = new Date(item.timestamp).getTime();
-    if (itemTime >= currentIntervalStart && itemTime < currentIntervalStart + interval) {
-      currentBatch.push(item);
-    } else {
+    if (rawPeData.length > 0) {
+      let currentIntervalStart = Math.floor(new Date(rawPeData[0].timestamp).getTime() / interval) * interval;
+      let currentBatch: { timestamp: string; ltp: number }[] = [];
+      for (const item of rawPeData) {
+        const itemTime = new Date(item.timestamp).getTime();
+        if (itemTime >= currentIntervalStart && itemTime < currentIntervalStart + interval) {
+          currentBatch.push(item);
+        } else {
+          if (currentBatch.length > 0) {
+            resampledPeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
+          }
+          currentIntervalStart = Math.floor(itemTime / interval) * interval;
+          currentBatch = [item];
+        }
+      }
       if (currentBatch.length > 0) {
         resampledPeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
       }
-      currentIntervalStart = Math.floor(itemTime / interval) * interval;
-      currentBatch = [item];
-    }
-  }
-  if (currentBatch.length > 0) {
-    resampledPeData.push(calculateOHLC(currentBatch, new Date(currentIntervalStart).toISOString()));
-  }
-}
     }
 
     ceData = resampledCeData;
     peData = resampledPeData;
     calculateStraddleData();
   }
-}
 
   function calculateOHLC(data: { timestamp: string; ltp: number }[], intervalStart: string): OHLCData {
     const open = data[0].ltp;
